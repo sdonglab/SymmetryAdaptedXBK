@@ -3,6 +3,8 @@ import dimod, math, itertools
 from itertools import product
 from openfermion.ops import QubitOperator
 from openfermion.utils import count_qubits
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from helper_functions import *
 
@@ -171,54 +173,3 @@ def XBK(qubit_Hs, qubit_Cs, r, sampler, starting_lam=0, num_samples=1000, streng
         print('Energy:', round(min_energy, 5))
     
     return min_energy, ground_state
-
-def XBK_transform_prime(op, r, p):
-    n = count_qubits(op)
-    op_terms = op.terms
-    new_op = QubitOperator()
-
-    for key, coeff in op_terms.items():
-        term = QubitOperator()
-        for j in range(r):
-            for k in range(r):
-                sign = 1 if (j < p) == (k < p) else -1
-                sub_term = QubitOperator('', 1)
-
-                spot = 0
-                for i in range(n):
-                    char = key[spot][1] if spot < len(key) and key[spot][0] == i else 'I'
-                    spot += 1 if char != 'I' else 0
-
-                    if char == 'X':
-                        sub_term *= QubitOperator('', 0) if j == k else (QubitOperator('', 0.5) - QubitOperator('Z'+str(i+n*j)+' Z'+str(i+n*k), 0.5))
-                    elif char == 'Y':
-                        sub_term *= QubitOperator('', 0) if j == k else (QubitOperator('Z'+str(i+n*k), 1j/2) - QubitOperator('Z'+str(i+n*j), 1j/2))
-                    elif char == 'Z':
-                        sub_term *= QubitOperator('Z'+str(i+n*j), 0.5) if j == k else (QubitOperator('Z'+str(i+n*j), 0.5) + QubitOperator('Z'+str(i+n*k), 0.5))
-                    else:
-                        sub_term *= QubitOperator('', 0.5) + QubitOperator('Z'+str(i+n*j)+' Z'+str(i+n*k), 0.5)
-
-                term += sign * sub_term
-
-        new_op += coeff * term
-
-    new_op.compress()
-    return new_op
-
-def construct_C_prime(n, r, p):
-    C = QubitOperator('', 0)
-    perms = list(product([1, -1], repeat=n))
-
-    for perm in perms:
-        term = QubitOperator('', 0)
-        for j in range(r):
-            product_term = QubitOperator('', 1)
-            for i in range(n):
-                product_term *= QubitOperator('', 0.5) + QubitOperator('Z'+str(i+n*j), perm[i]/2)
-
-            sign = -1 if j < p else 1
-            term += sign * product_term
-
-        C += term**2
-
-    return C

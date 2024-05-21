@@ -3,7 +3,7 @@ import pandas as pd
 import scipy as sci
 import symengine as se
 import dimod, itertools
-from openfermion.transforms import get_sparse_operator
+from openfermion.linalg import get_sparse_operator
 from openfermion.ops import QubitOperator
 from openfermion.utils import count_qubits, commutator
 
