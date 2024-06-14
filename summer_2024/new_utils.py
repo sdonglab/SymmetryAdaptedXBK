@@ -35,21 +35,19 @@ def get_unsimplified_hamiltonian(atom, basis, charge, spin, method = "RHF", verb
 
     if method == "RHF":
         mf = pyscf.scf.RHF(mol)
-        mf.kernel()
-    elif method == "DFT":
-        mf = pyscf.dft.RKS(mol)
-        mf.kernel()
-    elif method == "MP2":
-        mp=pyscf.scf.MP2(mol)
-        mp.kernel()
+    elif method == "UHF":
+        mf = pyscf.scf.UHF(mol)
     else:
         print(f"Error: {method} method has not been added yet.")
+        
+    mf.kernel()
 
+    qubit_op, fermion_op = quantumsymmetry.core.get_hamiltonian(mol, mf)
+    
     if verbose == True:
         print(f"qubit op: {qubit_op}")
         print(f"\n fermion op: {fermion_op}")
-    
-    qubit_op, fermion_op = quantumsymmetry.core.get_hamiltonian(mol, mf)
+        
     return qubit_op
 
 # ------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,7 +74,7 @@ def get_ising_info(qubit_op, r):
 
 # ------------------------------------------------------------------------------------------------------------------------------------------
 
-def get_energy_annealing(hamiltonian, r=1, starting_lam = 0, num_samples = 1000, strength = 1e3, 
+def get_energy_annealing(hamiltonian, r=1, starting_lam = 2, num_samples = 1000, strength = 1e3, 
                          real_annealing=False, direct_diagonalization=True):
     """ Placeholder Text"""
 
