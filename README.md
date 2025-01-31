@@ -1,4 +1,4 @@
-# Symmetry-Adapted Encoding for Electronic Structure Theory on Quantum Annealers
+# Symmetry-Adapted XBK Method for Electronic Structure Theory on Quantum Annealers
 
 ## Methods
 
